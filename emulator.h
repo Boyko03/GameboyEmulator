@@ -1,23 +1,21 @@
 #pragma once
-#include <cstdint>
+#include "common.h"
 
-typedef struct
+struct emu_context
 {
     bool paused;
     bool running;
-    uint64_t ticks;
-} emu_context;
+    u64 ticks;
+};
 
 class emulator
 {
 public:
-    emulator();
-
-    emu_context* get_context() { return &context_; }
+    emu_context* get_context() { return &ctx_; }
 
     int run(int argc, char** argv);
 
 private:
-    emu_context context_;
+    emu_context ctx_ = {};
 };
 
