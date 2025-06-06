@@ -27,15 +27,16 @@ struct cart_context
     rom_header* header;
 };
 
-class cartridge
+namespace cart
 {
-public:
+    static cart_context ctx;
+
     bool load(char* cart);
 
-    const char* get_license_name() const;
+    u8 read(u16 address);
+    void write(u16 address, u8 value);
 
-    const char* get_type_name() const;
+    const char* get_license_name();
 
-private:
-    cart_context ctx_ = {};
+    const char* get_type_name();
 };

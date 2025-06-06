@@ -5,6 +5,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "cartridge.h"
+#include "cpu.h"
 
 void delay(const uint32_t ms)
 {
@@ -19,9 +20,7 @@ int emulator::run(int argc, char** argv)
         return -1;
     }
 
-    cartridge cartridge;
-
-    if (!cartridge.load(argv[1]))
+    if (!cart::load(argv[1]))
     {
         std::cout << "Failed to write ROM file: " << argv[1] << "\n";
         return -2;
@@ -33,28 +32,33 @@ int emulator::run(int argc, char** argv)
     TTF_Init();
     std::cout << "TTF INIT\n";
 
-    //cpu_init();
+    cpu::init();
 
-    ctx_.running = true;
-    ctx_.paused = false;
-    ctx_.ticks = 0;
+    ctx.running = true;
+    ctx.paused = false;
+    ctx.ticks = 0;
 
-    while (ctx_.running)
+    while (ctx.running)
     {
-        if (ctx_.paused)
+        if (ctx.paused)
         {
             delay(10);
             continue;
         }
 
-        //if (!cpu_step())
+        if (!cpu::step())
         {
             std::cout << "CPU Stopped!\n";
             return -3;
         }
 
-        ctx_.ticks++;
+        ctx.ticks++;
     }
 
     return 0;
+}
+
+void emulator::cycle(int cpu_cycles)
+{
+    // TODO
 }

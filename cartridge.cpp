@@ -5,6 +5,8 @@
 #include <iostream>
 #include <unordered_map>
 
+extern cart_context cart::ctx;
+
 static const char* ROM_TYPES[] = {
     "ROM ONLY",
     "MBC1",
@@ -107,9 +109,9 @@ static const std::unordered_map<u8, const char* > LIC_CODE = {
     { 0xA4, "Konami (Yu-Gi-Oh!)"}
 };
 
-bool cartridge::load(char* cart)
+bool cart::load(char* cart)
 {
-    snprintf(ctx_.filename, sizeof(ctx_.filename), "%s", cart);
+    snprintf(ctx.filename, sizeof(ctx.filename), "%s", cart);
 
     std::ifstream file;
     file.open(cart);
@@ -120,7 +122,7 @@ bool cartridge::load(char* cart)
         return false;
     }
 
-    std::cout << "Opened " << ctx_.filename << "\n";
+    std::cout << "Opened " << ctx.filename << "\n";
 
     const std::streampos begin = file.tellg();
     file.seekg(0, std::ios::end);
@@ -128,48 +130,58 @@ bool cartridge::load(char* cart)
 
     file.seekg(0);
 
-    ctx_.rom_size = end - begin;
-    ctx_.rom_data = new u8[ctx_.rom_size];
-    file.read(reinterpret_cast<char*>(ctx_.rom_data), ctx_.rom_size);
+    ctx.rom_size = end - begin;
+    ctx.rom_data = new u8[ctx.rom_size];
+    file.read(reinterpret_cast<char*>(ctx.rom_data), ctx.rom_size);
 
     file.close();
 
-    ctx_.header = reinterpret_cast<rom_header*>(ctx_.rom_data + 0x100);
-    ctx_.header->title[15] = 0;
+    ctx.header = reinterpret_cast<rom_header*>(ctx.rom_data + 0x100);
+    ctx.header->title[15] = 0;
 
     std::cout << "Cartridge Loaded:\n";
-    printf("\t Title    : %s\n", ctx_.header->title);
-    printf("\t Type     : %2.2X (%s) \n", ctx_.header->type, get_type_name());
-    printf("\t ROM Size : %d KB\n", 32 << ctx_.header->rom_size);
-    printf("\t RAM Size : %2.2X\n", ctx_.header->ram_size);
-    printf("\t LIC Code : %2.2X (%s) \n", ctx_.header->lic_code, get_license_name());
-    printf("\t ROM Vers : %2.2X\n", ctx_.header->version);
+    printf("\t Title    : %s\n", ctx.header->title);
+    printf("\t Type     : %2.2X (%s) \n", ctx.header->type, get_type_name());
+    printf("\t ROM Size : %d KB\n", 32 << ctx.header->rom_size);
+    printf("\t RAM Size : %2.2X\n", ctx.header->ram_size);
+    printf("\t LIC Code : %2.2X (%s) \n", ctx.header->lic_code, get_license_name());
+    printf("\t ROM Vers : %2.2X\n", ctx.header->version);
 
     u8 checksum = 0;
     for (u16 address = 0x0134; address <= 0x014C; address++) {
-        checksum = checksum - ctx_.rom_data[address] - 1;
+        checksum = checksum - ctx.rom_data[address] - 1;
     }
 
-    printf("\t Checksum : %2.2X (%s)\n", ctx_.header->checksum, (checksum & 0xFF) ? "PASSED" : "FAILED");
+    printf("\t Checksum : %2.2X (%s)\n", ctx.header->checksum, (checksum & 0xFF) ? "PASSED" : "FAILED");
 
-    return ctx_.header->checksum == checksum;
+    return true;
 }
 
-const char* cartridge::get_license_name() const
+u8 cart::read(const u16 address)
 {
-    if (ctx_.header->new_lic_code <= 0xA4)
+    return ctx.rom_data[address];
+}
+
+void cart::write(u16 address, u8 value)
+{
+    NO_IMPL
+}
+
+const char* cart::get_license_name()
+{
+    if (ctx.header->new_lic_code <= 0xA4)
     {
-        return LIC_CODE.at(ctx_.header->lic_code);
+        return LIC_CODE.at(ctx.header->lic_code);
     }
 
     return "UNKNOWN";
 }
 
-const char* cartridge::get_type_name() const
+const char* cart::get_type_name()
 {
-    if (ctx_.header->type <= 0x22)
+    if (ctx.header->type <= 0x22)
     {
-        return ROM_TYPES[ctx_.header->type];
+        return ROM_TYPES[ctx.header->type];
     }
 
     return "UNKNOWN";

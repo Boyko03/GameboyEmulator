@@ -8,14 +8,13 @@ struct emu_context
     u64 ticks;
 };
 
-class emulator
+namespace emulator
 {
-public:
-    emu_context* get_context() { return &ctx_; }
+    static emu_context ctx = {};
 
     int run(int argc, char** argv);
 
-private:
-    emu_context ctx_ = {};
+    void cycle(int cpu_cycles);
+
 };
 
