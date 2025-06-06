@@ -21,9 +21,42 @@
     <ClCompile Include="emulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cartridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ppu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cartridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ppu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

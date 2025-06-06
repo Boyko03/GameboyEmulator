@@ -102,13 +102,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\libs\SDL3-3.2.16\include;.\libs\SDL3_ttf-3.2.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\libs\SDL3-3.2.16\lib\x64;.\libs\SDL3_ttf-3.2.2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.dll;SDL3_ttf.dll;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\lib\SDL3;.\lib\SDL3_ttf;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -126,11 +126,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bus.cpp" />
+    <ClCompile Include="cartridge.cpp" />
+    <ClCompile Include="cpu.cpp" />
     <ClCompile Include="emulator.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ppu.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bus.h" />
+    <ClInclude Include="cartridge.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="cpu.h" />
     <ClInclude Include="emulator.h" />
+    <ClInclude Include="ppu.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
