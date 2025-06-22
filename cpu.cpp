@@ -8,6 +8,7 @@
 void cpu::init()
 {
     ctx.regs.pc = 0x100;
+    ctx.regs.a = 0x01;
 }
 
 namespace cpu {
@@ -17,18 +18,14 @@ namespace cpu {
     {
         ctx.cur_opcode = bus::read(ctx.regs.pc++);
         ctx.cur_inst = instruction_by_opcode(ctx.cur_opcode);
-
-        if (!ctx.cur_inst)
-        {
-            printf("Unknown instruction! %02X\n", ctx.cur_opcode);
-            exit(-7);
-        }
     }
 
     void fetch_data()
     {
         ctx.mem_dest = 0;
         ctx.dest_is_mem = false;
+
+        if (!ctx.cur_inst) return;
 
         switch (ctx.cur_inst->mode)
         {
@@ -97,7 +94,14 @@ namespace cpu {
 
     void execute()
     {
-        printf("Not executing yet!\n");
+        IN_PROC proc = inst_get_processor(ctx.cur_inst->type);
+
+        if (!proc)
+        {
+            NO_IMPL
+        }
+
+        proc(&ctx);
     }
 
     u16 reverse(const u16 n) {
@@ -136,7 +140,15 @@ bool cpu::step()
         fetch_instruction();
         fetch_data();
 
-        printf("Executing Instruction: %02X\tPC: %04X\n", ctx.cur_opcode, pc);
+        printf("%04X: %-7s (%02X, %02X, %02X) A: %02X B: %02X C: %02X\n",
+            pc, inst_name(ctx.cur_inst->type), ctx.cur_opcode, bus::read(pc + 1),
+            bus::read(pc + 2), ctx.regs.a, ctx.regs.b, ctx.regs.c);
+
+        if (!ctx.cur_inst)
+        {
+            printf("Unknown instruction! %02X\n", ctx.cur_opcode);
+            exit(-7);
+        }
 
         execute();
     }

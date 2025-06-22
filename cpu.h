@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 
+enum class in_type;
 struct instruction;
 
 struct cpu_registers
@@ -30,6 +31,8 @@ struct cpu_context
 
     bool halted;
     bool stepping;
+
+    bool int_master_enabled;
 };
 
 namespace cpu
@@ -38,5 +41,11 @@ namespace cpu
     bool step();
 
     static cpu_context ctx;
+
+    typedef void (*IN_PROC)(cpu_context*);
+    IN_PROC inst_get_processor(in_type type);
+
 };
 
+#define CPU_FLAG_Z BIT(ctx->regs.f, 7)
+#define CPU_FLAG_C BIT(ctx->regs.f, 4)
