@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 
+enum class reg_type;
 enum class in_type;
 struct instruction;
 
@@ -44,6 +45,9 @@ namespace cpu
 
     typedef void (*IN_PROC)(cpu_context*);
     IN_PROC inst_get_processor(in_type type);
+
+    u16 read_reg(reg_type rt);
+    void set_reg(reg_type rt, u16 val);
 
 };
 

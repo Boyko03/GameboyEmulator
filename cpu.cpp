@@ -12,7 +12,6 @@ void cpu::init()
 }
 
 namespace cpu {
-    u16 read_reg(const reg_type rt);
 
     void fetch_instruction()
     {
@@ -30,36 +29,21 @@ namespace cpu {
         switch (ctx.cur_inst->mode)
         {
         case addr_mode::AM_IMP: return;
-        /*case addr_mode::AM_R_D16:
-            break;
-        case addr_mode::AM_R_R:
-            break;
-        case addr_mode::AM_MR_R:
-            break;*/
         case addr_mode::AM_R:
             ctx.fetched_data = read_reg(ctx.cur_inst->reg_1);
             return;
+        case addr_mode::AM_R_R:
+            ctx.fetched_data = read_reg(ctx.cur_inst->reg_2);
+            return;
         case addr_mode::AM_R_D8:
+        case addr_mode::AM_R_A8:
+        case addr_mode::AM_HL_SPR:
+        case addr_mode::AM_D8:
             ctx.fetched_data = bus::read(ctx.regs.pc);
             emulator::cycle(1);
             ctx.regs.pc++;
             return;
-        /*case addr_mode::AM_R_MR:
-            break;
-        case addr_mode::AM_R_HLI:
-            break;
-        case addr_mode::AM_R_HLD:
-            break;
-        case addr_mode::AM_HLI_R:
-            break;
-        case addr_mode::AM_HLD_R:
-            break;
-        case addr_mode::AM_R_A8:
-            break;
-        case addr_mode::AM_A8_R:
-            break;
-        case addr_mode::AM_HL_SPR:
-            break;*/
+        case addr_mode::AM_R_D16:
         case addr_mode::AM_D16: {
             const u16 lo = bus::read(ctx.regs.pc);
             emulator::cycle(1);
@@ -73,18 +57,103 @@ namespace cpu {
 
             return;
         }
-        /*case addr_mode::AM_D8:
-            break;
-        case addr_mode::AM_D16_R:
-            break;
-        case addr_mode::AM_MR_D8:
-            break;
-        case addr_mode::AM_MR:
-            break;
+        case addr_mode::AM_MR_R:
+            ctx.fetched_data = read_reg(ctx.cur_inst->reg_2);
+            ctx.mem_dest = read_reg(ctx.cur_inst->reg_1);
+            ctx.dest_is_mem = true;
+
+            if (ctx.cur_inst->reg_1 == reg_type::RT_C)
+            {
+                ctx.mem_dest |= 0xFF00;
+            }
+            return;
+        case addr_mode::AM_R_MR:
+        {
+            u16 addr = read_reg(ctx.cur_inst->reg_2);
+
+            if (ctx.cur_inst->reg_1 == reg_type::RT_C)
+            {
+                addr |= 0xFF00;
+            }
+
+            ctx.fetched_data = bus::read(addr);
+            emulator::cycle(1);
+            return;
+        }
+        case addr_mode::AM_R_HLI:
+            ctx.fetched_data = bus::read(read_reg(ctx.cur_inst->reg_2));
+            emulator::cycle(1);
+            set_reg(reg_type::RT_HL, read_reg(reg_type::RT_HL) + 1);
+            return;
+        case addr_mode::AM_R_HLD:
+            ctx.fetched_data = bus::read(read_reg(ctx.cur_inst->reg_2));
+            emulator::cycle(1);
+            set_reg(reg_type::RT_HL, read_reg(reg_type::RT_HL) - 1);
+            return;
+        case addr_mode::AM_HLI_R:
+            ctx.fetched_data = read_reg(ctx.cur_inst->reg_2);
+            ctx.mem_dest = read_reg(ctx.cur_inst->reg_1);
+            ctx.dest_is_mem = true;
+            set_reg(reg_type::RT_HL, read_reg(reg_type::RT_HL) + 1);
+            return;
+        case addr_mode::AM_HLD_R:
+            ctx.fetched_data = read_reg(ctx.cur_inst->reg_2);
+            ctx.mem_dest = read_reg(ctx.cur_inst->reg_1);
+            ctx.dest_is_mem = true;
+            set_reg(reg_type::RT_HL, read_reg(reg_type::RT_HL) - 1);
+            return;
+
+        case addr_mode::AM_A8_R:
+            ctx.mem_dest = bus::read(ctx.regs.pc) | 0xFF00;
+            ctx.dest_is_mem = true;
+            emulator::cycle(1);
+            ctx.regs.pc++;
+            return;
         case addr_mode::AM_A16_R:
-            break;
+        case addr_mode::AM_D16_R: {
+            const u16 lo = bus::read(ctx.regs.pc);
+            emulator::cycle(1);
+
+            const u16 hi = bus::read(ctx.regs.pc + 1);
+            emulator::cycle(1);
+
+            ctx.mem_dest = lo | (hi << 8);
+            ctx.dest_is_mem = true;
+
+            ctx.regs.pc += 2;
+            ctx.fetched_data = read_reg(ctx.cur_inst->reg_2);
+
+            return;
+        }
+        case addr_mode::AM_MR_D8:
+            ctx.fetched_data = bus::read(ctx.regs.pc);
+            emulator::cycle(1);
+            ctx.regs.pc++;
+            ctx.mem_dest = read_reg(ctx.cur_inst->reg_1);
+            ctx.dest_is_mem = true;
+            return;
+        case addr_mode::AM_MR:
+            ctx.mem_dest = read_reg(ctx.cur_inst->reg_1);
+            ctx.dest_is_mem = true;
+            ctx.fetched_data = bus::read(read_reg(ctx.cur_inst->reg_1));
+            emulator::cycle(1);
+            return;
         case addr_mode::AM_R_A16:
-            break;*/
+        {
+            u16 lo = bus::read(ctx.regs.pc);
+            emulator::cycle(1);
+
+            u16 hi = bus::read(ctx.regs.pc + 1);
+            emulator::cycle(1);
+
+            u16 addr = lo | (hi << 8);
+
+            ctx.regs.pc += 2;
+            ctx.fetched_data = bus::read(addr);
+            emulator::cycle(1);
+
+            return;
+        }
         default:
             printf("Unknown Addressing Mode! %d (%02X)\n", ctx.cur_inst->mode, ctx.cur_opcode);
             exit(-7);
@@ -127,6 +196,34 @@ namespace cpu {
         case reg_type::RT_PC: return ctx.regs.pc;
         case reg_type::RT_SP: return ctx.regs.sp;
         default: return 0;
+        }
+    }
+
+    void set_reg(const reg_type rt, u16 val)
+    {
+        switch (rt) {
+        case reg_type::RT_A: ctx.regs.a = val & 0xFF; break;
+        case reg_type::RT_F: ctx.regs.f = val & 0xFF; break;
+        case reg_type::RT_B: ctx.regs.b = val & 0xFF; break;
+        case reg_type::RT_C: {
+            ctx.regs.c = val & 0xFF;
+        } break;
+        case reg_type::RT_D: ctx.regs.d = val & 0xFF; break;
+        case reg_type::RT_E: ctx.regs.e = val & 0xFF; break;
+        case reg_type::RT_H: ctx.regs.h = val & 0xFF; break;
+        case reg_type::RT_L: ctx.regs.l = val & 0xFF; break;
+
+        case reg_type::RT_AF: *((u16*)&ctx.regs.a) = reverse(val); break;
+        case reg_type::RT_BC: *((u16*)&ctx.regs.b) = reverse(val); break;
+        case reg_type::RT_DE: *((u16*)&ctx.regs.d) = reverse(val); break;
+        case reg_type::RT_HL: {
+            *((u16*)&ctx.regs.h) = reverse(val);
+            break;
+        }
+
+        case reg_type::RT_PC: ctx.regs.pc = val; break;
+        case reg_type::RT_SP: ctx.regs.sp = val; break;
+        case reg_type::RT_NONE: break;
         }
     }
 }

@@ -1,8 +1,11 @@
 #include <unordered_map>
 
+#include "bus.h"
 #include "cpu.h"
 #include "emulator.h"
 #include "instructions.h"
+
+static void cpu_set_flags(cpu_context* ctx, char z, char n, char h, char c);
 
 static void proc_none(cpu_context* ctx)
 {
@@ -17,7 +20,35 @@ static void proc_nop(cpu_context* ctx)
 
 static void proc_ld(cpu_context* ctx)
 {
-    // TODO
+    if (ctx->dest_is_mem)
+    {
+        if (ctx->cur_inst->reg_2 >= reg_type::RT_AF)
+        {
+            // if 16 bit register
+            emulator::cycle(1);
+            bus::write16(ctx->mem_dest, ctx->fetched_data);
+        }
+        else
+        {
+            emulator::cycle(1);
+            bus::write(ctx->mem_dest, ctx->fetched_data);
+        }
+
+        return;
+    }
+
+    if (ctx->cur_inst->mode == addr_mode::AM_HL_SPR)
+    {
+        const u8 hflag = (cpu::read_reg(ctx->cur_inst->reg_2) & 0xF) + (ctx->fetched_data & 0xF) >= 0x10;
+        const u8 cflag = (cpu::read_reg(ctx->cur_inst->reg_2) & 0xFF) + (ctx->fetched_data & 0xFF) >= 0x100;
+
+        cpu_set_flags(ctx, 0, 0, hflag, cflag);
+        cpu::set_reg(ctx->cur_inst->reg_1, cpu::read_reg(ctx->cur_inst->reg_2) + static_cast<char>(ctx->fetched_data));
+
+        return;
+    }
+
+    cpu::set_reg(ctx->cur_inst->reg_1, ctx->fetched_data);
 }
 
 static void cpu_set_flags(cpu_context* ctx, const char z, const char n, const char h, const char c)

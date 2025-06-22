@@ -26,6 +26,14 @@ u8 bus::read(const u16 address)
     NO_IMPL
 }
 
+u16 bus::read16(const u16 address)
+{
+    const u16 lo = read(address);
+    const u16 hi = read(address + 1);
+
+    return lo | (hi << 8);
+}
+
 void bus::write(const u16 address, const u8 value)
 {
     if (address < 0x8000)
@@ -35,4 +43,10 @@ void bus::write(const u16 address, const u8 value)
     }
 
     NO_IMPL
+}
+
+void bus::write16(const u16 address, const u16 value)
+{
+    write(address + 1, (value >> 8) & 0xFF);
+    write(address, value & 0xFF);
 }
