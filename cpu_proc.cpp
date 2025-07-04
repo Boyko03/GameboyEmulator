@@ -5,7 +5,28 @@
 #include "emulator.h"
 #include "instructions.h"
 
-static void cpu_set_flags(cpu_context* ctx, char z, char n, char h, char c);
+static void cpu_set_flags(cpu_context* ctx, const char z, const char n, const char h, const char c)
+{
+    if (z != -1)
+    {
+        BIT_SET(ctx->regs.f, 7, z);
+    }
+
+    if (n != -1)
+    {
+        BIT_SET(ctx->regs.f, 6, n);
+    }
+
+    if (h != -1)
+    {
+        BIT_SET(ctx->regs.f, 5, h);
+    }
+
+    if (c != -1)
+    {
+        BIT_SET(ctx->regs.f, 4, c);
+    }
+}
 
 static void proc_none(cpu_context* ctx)
 {
@@ -49,29 +70,6 @@ static void proc_ld(cpu_context* ctx)
     }
 
     cpu::set_reg(ctx->cur_inst->reg_1, ctx->fetched_data);
-}
-
-static void cpu_set_flags(cpu_context* ctx, const char z, const char n, const char h, const char c)
-{
-    if (z != -1)
-    {
-        BIT_SET(ctx->regs.f, 7, z);
-    }
-
-    if (n != -1)
-    {
-        BIT_SET(ctx->regs.f, 6, n);
-    }
-
-    if (h != -1)
-    {
-        BIT_SET(ctx->regs.f, 5, h);
-    }
-
-    if (c != -1)
-    {
-        BIT_SET(ctx->regs.f, 4, c);
-    }
 }
 
 static void proc_xor(cpu_context* ctx)

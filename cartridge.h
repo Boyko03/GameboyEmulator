@@ -25,13 +25,16 @@ struct cart_context
     u32 rom_size;
     u8* rom_data;
     rom_header* header;
+
+    ~cart_context()
+    {
+        free(rom_data);
+    }
 };
 
 namespace cart
 {
-    static cart_context ctx;
-
-    bool load(char* cart);
+    bool load(const char* cart);
 
     u8 read(u16 address);
     void write(u16 address, u8 value);

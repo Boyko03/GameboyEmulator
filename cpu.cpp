@@ -5,13 +5,13 @@
 #include "instructions.h"
 
 
-void cpu::init()
-{
-    ctx.regs.pc = 0x100;
-    ctx.regs.a = 0x01;
-}
-
 namespace cpu {
+
+    void init()
+    {
+        ctx.regs.pc = 0x100;
+        ctx.regs.a = 0x01;
+    }
 
     void fetch_instruction()
     {
@@ -71,7 +71,7 @@ namespace cpu {
         {
             u16 addr = read_reg(ctx.cur_inst->reg_2);
 
-            if (ctx.cur_inst->reg_1 == reg_type::RT_C)
+            if (ctx.cur_inst->reg_2 == reg_type::RT_C)
             {
                 addr |= 0xFF00;
             }
@@ -140,13 +140,13 @@ namespace cpu {
             return;
         case addr_mode::AM_R_A16:
         {
-            u16 lo = bus::read(ctx.regs.pc);
+            const u16 lo = bus::read(ctx.regs.pc);
             emulator::cycle(1);
 
-            u16 hi = bus::read(ctx.regs.pc + 1);
+            const u16 hi = bus::read(ctx.regs.pc + 1);
             emulator::cycle(1);
 
-            u16 addr = lo | (hi << 8);
+            const u16 addr = lo | (hi << 8);
 
             ctx.regs.pc += 2;
             ctx.fetched_data = bus::read(addr);
@@ -199,27 +199,22 @@ namespace cpu {
         }
     }
 
-    void set_reg(const reg_type rt, u16 val)
+    void set_reg(const reg_type rt, const u16 val)
     {
         switch (rt) {
         case reg_type::RT_A: ctx.regs.a = val & 0xFF; break;
         case reg_type::RT_F: ctx.regs.f = val & 0xFF; break;
         case reg_type::RT_B: ctx.regs.b = val & 0xFF; break;
-        case reg_type::RT_C: {
-            ctx.regs.c = val & 0xFF;
-        } break;
+        case reg_type::RT_C: ctx.regs.c = val & 0xFF;break;
         case reg_type::RT_D: ctx.regs.d = val & 0xFF; break;
         case reg_type::RT_E: ctx.regs.e = val & 0xFF; break;
         case reg_type::RT_H: ctx.regs.h = val & 0xFF; break;
         case reg_type::RT_L: ctx.regs.l = val & 0xFF; break;
 
-        case reg_type::RT_AF: *((u16*)&ctx.regs.a) = reverse(val); break;
-        case reg_type::RT_BC: *((u16*)&ctx.regs.b) = reverse(val); break;
-        case reg_type::RT_DE: *((u16*)&ctx.regs.d) = reverse(val); break;
-        case reg_type::RT_HL: {
-            *((u16*)&ctx.regs.h) = reverse(val);
-            break;
-        }
+        case reg_type::RT_AF: *reinterpret_cast<u16*>(&ctx.regs.a) = reverse(val); break;
+        case reg_type::RT_BC: *reinterpret_cast<u16*>(&ctx.regs.b) = reverse(val); break;
+        case reg_type::RT_DE: *reinterpret_cast<u16*>(&ctx.regs.d) = reverse(val); break;
+        case reg_type::RT_HL: *reinterpret_cast<u16*>(&ctx.regs.h) = reverse(val); break;
 
         case reg_type::RT_PC: ctx.regs.pc = val; break;
         case reg_type::RT_SP: ctx.regs.sp = val; break;
