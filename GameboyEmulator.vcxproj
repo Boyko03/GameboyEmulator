@@ -187,6 +187,7 @@
     <ClCompile Include="instructions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ppu.cpp" />
+    <ClCompile Include="ram.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,6 +198,7 @@
     <ClInclude Include="emulator.h" />
     <ClInclude Include="instructions.h" />
     <ClInclude Include="ppu.h" />
+    <ClInclude Include="ram.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,7 @@
 #include "bus.h"
 
 #include "cartridge.h"
+#include "ram.h"
 
 // 0x0000 - 0x3FFF : ROM Bank 0
 // 0x4000 - 0x7FFF : ROM Bank 1 - Switchable
@@ -20,10 +21,58 @@ u8 bus::read(const u16 address)
 {
     if (address < 0x8000)
     {
+        // ROM Data
         return cart::read(address);
     }
+    if (address < 0xA000)
+    {
+        // Char/Map Data
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    }
+    if (address < 0xC000)
+    {
+        // Cartridge RAM
+        return cart::read(address);
+    }
+    if (address < 0xE000)
+    {
+        // WRAM (Working RAM)
+        return wram::read(address);
+    }
+    if (address < 0xFE00)
+    {
+        // reserved echo ram
+        return 0;
+    }
+    if (address < 0xFEA0)
+    {
+        // OAM
+        // TODO
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    }
+    if (address < 0xFF00)
+    {
+        // reserved unusable
+        return 0;
+    }
+    if (address < 0xFF80)
+    {
+        // IO Registers
+        // TODO
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    }
+    if (address == 0xFFFF)
+    {
+        // CPU Enable Register
+        // TODO
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    }
 
-    NO_IMPL
+    return hram::read(address);
 }
 
 u16 bus::read16(const u16 address)
@@ -39,10 +88,56 @@ void bus::write(const u16 address, const u8 value)
     if (address < 0x8000)
     {
         cart::write(address, value);
-        return;
     }
-
-    NO_IMPL
+    else if (address < 0xA000)
+    {
+        // Char/Map Data
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    }
+    else if (address < 0xC000)
+    {
+        // EXT-RAM
+        cart::write(address, value);
+    }
+    else if (address < 0xE000)
+    {
+        // WRAM (Working RAM)
+        wram::write(address, value);
+    }
+    else if (address < 0xFE00)
+    {
+        // reserved echo ram
+    }
+    else if (address < 0xFEA0)
+    {
+        // OAM
+        // TODO
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    }
+    else if (address < 0xFF00)
+    {
+        // reserved unusable
+    }
+    else if (address < 0xFF80)
+    {
+        // IO Registers
+        // TODO
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    }
+    else if (address == 0xFFFF)
+    {
+        // CPU Enable Register
+        // TODO
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    }
+    else
+    {
+        hram::write(address, value);
+    }
 }
 
 void bus::write16(const u16 address, const u16 value)
