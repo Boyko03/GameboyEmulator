@@ -1,6 +1,7 @@
 #include "bus.h"
 
 #include "cartridge.h"
+#include "cpu.h"
 #include "ram.h"
 
 // 0x0000 - 0x3FFF : ROM Bank 0
@@ -62,14 +63,12 @@ u8 bus::read(const u16 address)
         // IO Registers
         // TODO
         printf("UNSUPPORTED bus_read(%04X)\n", address);
-        NO_IMPL
+        //NO_IMPL
     }
     if (address == 0xFFFF)
     {
         // CPU Enable Register
-        // TODO
-        printf("UNSUPPORTED bus_read(%04X)\n", address);
-        NO_IMPL
+        return cpu::get_ie_register();
     }
 
     return hram::read(address);
@@ -125,14 +124,12 @@ void bus::write(const u16 address, const u8 value)
         // IO Registers
         // TODO
         printf("UNSUPPORTED bus_write(%04X)\n", address);
-        NO_IMPL
+        //NO_IMPL
     }
     else if (address == 0xFFFF)
     {
         // CPU Enable Register
-        // TODO
-        printf("UNSUPPORTED bus_write(%04X)\n", address);
-        NO_IMPL
+        cpu::set_ie_register(value);
     }
     else
     {

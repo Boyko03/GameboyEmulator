@@ -72,6 +72,20 @@ static void proc_ld(cpu_context* ctx)
     cpu::set_reg(ctx->cur_inst->reg_1, ctx->fetched_data);
 }
 
+static void proc_ldh(cpu_context* ctx)
+{
+    if (ctx->cur_inst->reg_1 == reg_type::RT_A)
+    {
+        cpu::set_reg(ctx->cur_inst->reg_1, bus::read(0xFF00 | ctx->fetched_data));
+    }
+    else
+    {
+        bus::write(0xFF00 | ctx->fetched_data, ctx->regs.a);
+    }
+
+    emulator::cycle(1);
+}
+
 static void proc_xor(cpu_context* ctx)
 {
     ctx->regs.a ^= ctx->fetched_data & 0xFF;
@@ -115,6 +129,7 @@ namespace cpu
         {in_type::IN_NONE, proc_none},
         {in_type::IN_NOP, proc_nop},
         {in_type::IN_LD, proc_ld},
+        {in_type::IN_LDH, proc_ldh},
         {in_type::IN_JP, proc_jp},
         {in_type::IN_DI, proc_di},
         {in_type::IN_XOR, proc_xor}

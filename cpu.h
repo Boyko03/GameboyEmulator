@@ -34,6 +34,7 @@ struct cpu_context
     bool stepping;
 
     bool int_master_enabled;
+    u8 ie_register;
 };
 
 namespace cpu
@@ -48,6 +49,9 @@ namespace cpu
 
     u16 read_reg(reg_type rt);
     void set_reg(reg_type rt, u16 val);
+
+    u8 get_ie_register();
+    void set_ie_register(u8 n);
 
 };
 

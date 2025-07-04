@@ -117,11 +117,13 @@ static std::unordered_map<u8, instruction> instructions = {
     {0xC3, {in_type::IN_JP, addr_mode::AM_D16}},
 
     //0xEX
+    {0xE0, {in_type::IN_LDH, addr_mode::AM_A8_R, reg_type::RT_NONE, reg_type::RT_A}},
     {0xE2, {in_type::IN_LD, addr_mode::AM_MR_R, reg_type::RT_C, reg_type::RT_A}},
     {0xEA, {in_type::IN_LD, addr_mode::AM_A16_R, reg_type::RT_NONE, reg_type::RT_A}},
 
 
     //0xFX
+    {0xF0, {in_type::IN_LDH, addr_mode::AM_R_A8, reg_type::RT_A}},
     {0xF2, {in_type::IN_LD, addr_mode::AM_R_MR, reg_type::RT_A, reg_type::RT_C}},
     {0xF3, {in_type::IN_DI}},
     {0xFA, {in_type::IN_LD, addr_mode::AM_R_A16, reg_type::RT_A}},
